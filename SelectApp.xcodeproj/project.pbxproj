@@ -12,6 +12,7 @@
 		023F7AD1AC92D1D735F8684C /* LauncherLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C7A05CFCD52C4D42440FC1 /* LauncherLayout.swift */; };
 		0A5AFEB22F4E3414184C004F /* SelectionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72BEC2AF38D307249831B4CD /* SelectionMonitor.swift */; };
 		10363F2E39CD47B0C5C7E6EF /* FeedbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEED3BE2E7A2CB49E1019934 /* FeedbackService.swift */; };
+		125528B298C53E4B22444965 /* InstalledAppsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84C8078376F40411537958C /* InstalledAppsService.swift */; };
 		1722A4CAB1C1494C7BB145C4 /* ScrollInsetFixer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A52FBF2B230CFF7FDE44674 /* ScrollInsetFixer.swift */; };
 		1D560D51778E35AE8DF922D1 /* LauncherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9778EB30A7B6B239D7396DC0 /* LauncherView.swift */; };
 		2101F3983C79381A1DB710AC /* AIOutputCleaner.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDEB877C870D3D1D7CFAD3FC /* AIOutputCleaner.swift */; };
@@ -135,6 +136,7 @@
 		DDEB877C870D3D1D7CFAD3FC /* AIOutputCleaner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIOutputCleaner.swift; sourceTree = "<group>"; };
 		DF809733516DEC3F8A2591F7 /* LauncherMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LauncherMetrics.swift; sourceTree = "<group>"; };
 		E4D0C8A4A7A872218E145166 /* LicenseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseManager.swift; sourceTree = "<group>"; };
+		E84C8078376F40411537958C /* InstalledAppsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledAppsService.swift; sourceTree = "<group>"; };
 		EA1C7102EDC95AA924B77645 /* SettingsSearchIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSearchIndex.swift; sourceTree = "<group>"; };
 		EA8E4D9533B4C5DA0A852BDF /* AIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIService.swift; sourceTree = "<group>"; };
 		F5F789E85D71B9A093D4E1D8 /* ShortcutNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutNames.swift; sourceTree = "<group>"; };
@@ -158,6 +160,7 @@
 			isa = PBXGroup;
 			children = (
 				AEED3BE2E7A2CB49E1019934 /* FeedbackService.swift */,
+				E84C8078376F40411537958C /* InstalledAppsService.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -496,6 +499,7 @@
 				021681D53FA7AB1252A91C11 /* HUDPresenter.swift in Sources */,
 				2AA0BA1476780B7663F18247 /* ImageActions.swift in Sources */,
 				CCA225FA5F3FA8C91C584118 /* ImageService.swift in Sources */,
+				125528B298C53E4B22444965 /* InstalledAppsService.swift in Sources */,
 				5878C4429775990F66DF9A0D /* KeychainStore.swift in Sources */,
 				C662BB615899E28E8B9605B5 /* LauncherAction.swift in Sources */,
 				023F7AD1AC92D1D735F8684C /* LauncherLayout.swift in Sources */,

@@ -327,6 +327,8 @@ private struct GeneralSettingsView: View {
     @EnvironmentObject var settings: AppSettings
     @State private var accessibilityTrusted = AccessibilityPermission.isTrusted
     @State private var runningApps: [PasteIntoAppService.RunningApp] = []
+    @State private var addAppSearch = ""
+    @State private var installedAppsLoaded = false
     private let pollTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -365,16 +367,47 @@ private struct GeneralSettingsView: View {
 
             SettingsGroup(title: "Excluded Apps") {
                 SettingDescription(text: "Select won't appear when capturing text or images from these apps.")
-                if runningApps.isEmpty {
-                    Text("No running apps found.").foregroundStyle(.secondary)
+
+                if settings.excludedBundleIDs.isEmpty {
+                    Text("No apps excluded.")
+                        .foregroundStyle(.secondary)
                 } else {
-                    ForEach(runningApps) { app in
-                        Toggle(isOn: exclusionBinding(for: app)) {
-                            HStack(spacing: 8) {
-                                if let icon = app.icon {
-                                    Image(nsImage: icon).resizable().frame(width: 18, height: 18)
-                                }
-                                Text(app.name)
+                    ForEach(sortedExcludedBundleIDs, id: \.self) { bundleID in
+                        Toggle(isOn: exclusionBinding(bundleID: bundleID)) {
+                            ExcludedAppRow(bundleID: bundleID)
+                        }
+                    }
+                }
+
+                TextField("Search installed apps…", text: $addAppSearch)
+                    .textFieldStyle(.roundedBorder)
+
+                if !addAppSearch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    if !installedAppsLoaded {
+                        Text("Loading installed apps…")
+                            .foregroundStyle(.secondary)
+                    } else if addAppSearchResults.isEmpty {
+                        Text("No matching apps found.")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(addAppSearchResults) { app in
+                            Toggle(isOn: exclusionBinding(bundleID: app.bundleID)) {
+                                ExcludedAppRow(bundleID: app.bundleID, name: app.name, icon: app.icon)
+                            }
+                        }
+                    }
+                }
+
+                if !runningAppsForQuickExclude.isEmpty {
+                    Text("Running now")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 4)
+
+                    ForEach(runningAppsForQuickExclude) { app in
+                        if let bundleID = app.bundleID {
+                            Toggle(isOn: exclusionBinding(bundleID: bundleID)) {
+                                ExcludedAppRow(bundleID: bundleID, name: app.name, icon: app.icon)
                             }
                         }
                     }
@@ -394,31 +427,80 @@ private struct GeneralSettingsView: View {
                 SettingDescription(text: "Required to read text selections from other apps.")
             }
         }
-        .onAppear { refreshRunningApps() }
-        .onReceive(pollTimer) { _ in accessibilityTrusted = AccessibilityPermission.isTrusted }
+        .onAppear {
+            refreshRunningApps()
+            loadInstalledAppsIfNeeded()
+        }
+        .onReceive(pollTimer) { _ in
+            accessibilityTrusted = AccessibilityPermission.isTrusted
+            refreshRunningApps()
+        }
+    }
+
+    private var sortedExcludedBundleIDs: [String] {
+        settings.excludedBundleIDs.sorted {
+            InstalledAppsService.displayName(forBundleID: $0)
+                .localizedCaseInsensitiveCompare(
+                    InstalledAppsService.displayName(forBundleID: $1)
+                ) == .orderedAscending
+        }
+    }
+
+    private var addAppSearchResults: [InstalledAppsService.InstalledApp] {
+        let excluded = Set(settings.excludedBundleIDs)
+        return InstalledAppsService.searchInstalledApps(matching: addAppSearch)
+            .filter { !excluded.contains($0.bundleID) }
+    }
+
+    /// Running dock apps that are not already listed in the persisted exclusion block above.
+    private var runningAppsForQuickExclude: [PasteIntoAppService.RunningApp] {
+        let excluded = Set(settings.excludedBundleIDs)
+        let searchActive = !addAppSearch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        guard !searchActive else { return [] }
+
+        return runningApps.filter { app in
+            guard let bundleID = app.bundleID else { return false }
+            return !excluded.contains(bundleID)
+        }
+    }
+
+    private func loadInstalledAppsIfNeeded() {
+        guard !installedAppsLoaded else { return }
+        Task.detached(priority: .utility) {
+            _ = InstalledAppsService.installedApps()
+            await MainActor.run { installedAppsLoaded = true }
+        }
     }
 
     private func refreshRunningApps() {
         runningApps = PasteIntoAppService().runningApps()
     }
 
-    private func exclusionBinding(for app: PasteIntoAppService.RunningApp) -> Binding<Bool> {
+    private func exclusionBinding(bundleID: String) -> Binding<Bool> {
         Binding(
-            get: {
-                guard let bundleID = app.bundleID else { return false }
-                return settings.excludedBundleIDs.contains(bundleID)
-            },
+            get: { settings.excludedBundleIDs.contains(bundleID) },
             set: { excluded in
-                guard let bundleID = app.bundleID else { return }
-                if excluded {
-                    if !settings.excludedBundleIDs.contains(bundleID) {
-                        settings.toggleExclusion(bundleID: bundleID)
-                    }
-                } else if settings.excludedBundleIDs.contains(bundleID) {
+                let contains = settings.excludedBundleIDs.contains(bundleID)
+                if excluded != contains {
                     settings.toggleExclusion(bundleID: bundleID)
                 }
             }
         )
+    }
+}
+
+private struct ExcludedAppRow: View {
+    let bundleID: String
+    var name: String?
+    var icon: NSImage?
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(nsImage: icon ?? InstalledAppsService.icon(forBundleID: bundleID))
+                .resizable()
+                .frame(width: 18, height: 18)
+            Text(name ?? InstalledAppsService.displayName(forBundleID: bundleID))
+        }
     }
 }
 
