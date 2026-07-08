@@ -1,0 +1,16 @@
+// Copy to Config/Local.xcconfig and uncomment + fill in your Team ID.
+// Local.xcconfig is gitignored — each developer keeps their own copy.
+//
+// WHY: With a stable Apple Development certificate, macOS remembers
+// Accessibility and Screen Recording across rebuilds. Without it, every
+// rebuild uses ad-hoc signing and permissions reset.
+//
+// SETUP (one time):
+//   1. Xcode → Settings → Accounts → add your Apple ID
+//   2. Select your account → Manage Certificates → + → Apple Development
+//   3. Find Team ID: Xcode → Settings → Accounts → (your team) → Team ID
+//      Or run: security find-identity -v -p codesigning
+//   4. Uncomment the two lines below and paste your Team ID
+//
+// DEVELOPMENT_TEAM = ABCDE12345
+// CODE_SIGN_IDENTITY = Apple Development
